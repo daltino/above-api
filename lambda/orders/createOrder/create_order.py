@@ -4,6 +4,18 @@ import uuid
 import json
 from decimalencoder.decimal_encoder import DecimalEncoder
 
+def createResponse(statusCode, body):
+  return {
+    "statusCode": statusCode,
+    "body": json.dumps(body),
+    "headers":{
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "OPTIONS,POST"
+    },
+    "isBase64Encoded": False,
+  }
+
 def lambda_handler(event, context):
   dynamodb = boto3.resource("dynamodb")
   SHOES_TABLE = os.environ["SHOES_TABLE"]
@@ -21,14 +33,7 @@ def lambda_handler(event, context):
   shoeId = data.get("shoeId")
   
   if not shoeId:
-    return {
-      "statusCode":400,
-      "body": json.dumps({"error": "No ShoeId was provided"}),
-      "headers":{
-        "Content-Type": "application/json",
-      },
-      "isBase64Encoded": False,
-    }
+    return createResponse(400, {"error": "No ShoeId was provided"})
   
   # Retrieve the shoe data from DynamoDB Shoes table
   try:
@@ -41,14 +46,8 @@ def lambda_handler(event, context):
     shoe = shoe.get("Item")
   
     if not shoe:
-      return {
-        "statusCode":400,
-        "body": json.dumps({"error": "No Shoe exists for the given ShoeId"}),
-        "headers":{
-          "Content-Type": "application/json",
-        },
-        "isBase64Encoded": False,
-      }
+      return createResponse(400, {"error": "No Shoe exists for the given ShoeId"})
+
   except Exception as e:
     print(f"Exception - {e} occured")
   
@@ -58,15 +57,8 @@ def lambda_handler(event, context):
   shippingInfo = data.get("shippingInfo")
   
   if not client or not size or not shippingInfo:
-    return {
-      "statusCode":400,
-      "body": json.dumps({"error": "Please make sure you provide values for these fields: client, size and shippingInfo"}),
-      "headers":{
-        "Content-Type": "application/json",
-      },
-      "isBase64Encoded": False,
-    }
-  
+    return createResponse(400, {"error": "Please make sure you provide values for these fields: client, size and shippingInfo"})
+
   # Create the order from the POST request
   orderId = str(uuid.uuid4())
   order = {
@@ -88,15 +80,9 @@ def lambda_handler(event, context):
   
   ordersResponseHttpStatusCode = response.get("ResponseMetadata").get("HTTPStatusCode")
   if ordersResponseHttpStatusCode != 200:
-    return {
-      "statusCode":500,
-      "body": json.dumps({"error": f"Could not save the order. Error {ordersResponseHttpStatusCode}"}),
-      "headers":{
-        "Content-Type": "application/json",
-      },
-      "isBase64Encoded": False,
-    }
+    return createResponse(500, {"error": f"Could not save the order. Error {ordersResponseHttpStatusCode}"})
   
+  # Save the order as a JSON object in S3
   orderJson = {
     **order,
     "Shoe": shoe
@@ -112,11 +98,4 @@ def lambda_handler(event, context):
   except Exception as e:
     print(f"Exception - {e} occured")
 
-  return {
-    'statusCode': 200,
-    'body': json.dumps({ "message": "Order was created successfully"}),
-    "isBase64Encoded": False,
-    "headers": {
-        "Content-Type": "application/json",
-    }
-  }
+  return createResponse(200, { "message": "Order was created successfully"})

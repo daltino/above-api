@@ -41,7 +41,9 @@ def lambda_handler(event, context):
     "body": json.dumps({ "shoes": response["Items"] }, cls=DecimalEncoder),
     "isBase64Encoded": False,
     "headers": {
-        "Content-Type": "application/json",
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "OPTIONS,GET"
     }
   }
 

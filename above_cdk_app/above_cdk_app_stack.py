@@ -60,8 +60,14 @@ class AboveCdkAppStack(Stack):
         # Create a dev deployment for the ApiGateway
         dev_deployment = apigateway_cdk.StageOptions(stage_name="dev")
 
-        # Create ApiGateway
-        above_api = apigateway_cdk.RestApi(self, "above_api", deploy_options=dev_deployment)
+        # Create ApiGateway, Note: Add more specific origins for CORS support
+        above_api = apigateway_cdk.RestApi(self, "above_api",
+                deploy_options=dev_deployment,
+                description="Above API for listing shoes and creating orders",
+                default_cors_preflight_options=apigateway_cdk.CorsOptions(
+                    allow_methods=['GET', 'POST'],
+                    allow_origins=['*']
+                ))
 
         # Deploy for prod (COMMENT OUT TO TURN OFF/ON) OR USE CI/CD (CodePipeline)
         
