@@ -1,5 +1,5 @@
 
-# Welcome to your CDK Python project!
+# Above CDK App Stack
 
 You should explore the contents of this project. It demonstrates a CDK app with an instance of a stack (`above_cdk_app_stack`)
 which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
@@ -61,5 +61,17 @@ command.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
+ * `cdk destroy`     detroys the stack
+
+ ## Testing the two endpoints
+
+After deploying the entire CDK stack you can test the endpoints as follows:
+ ### ListShoes
+
+ Send a GET request to https://<APIGW_ID>.execute-api.us-west-2.amazonaws.com/dev/shoes
+
+ ### CreateOrder
+
+ Send a POST request to https://<APIGW_ID>.execute-api.us-west-2.amazonaws.com/dev/orders
 
 Enjoy!
